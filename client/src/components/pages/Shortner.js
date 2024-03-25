@@ -13,6 +13,7 @@ const Shortner = () => {
   const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
   const [startDate, setStartDate] = useState(""); // State variable for start date
   const [expirationDate, setExpirationDate] = useState(""); // State variable for expiration date
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false); // State variable to toggle advanced settings visibility
 
   useEffect(() => {
     fetchUserData(user.name);
@@ -49,6 +50,10 @@ const Shortner = () => {
 
   const toggleUserData = () => {
     setShowUserData(!showUserData);
+  };
+
+  const toggleAdvancedSettings = () => {
+    setShowAdvancedSettings(!showAdvancedSettings);
   };
 
   return (
@@ -101,15 +106,21 @@ const Shortner = () => {
         </div>
       )}
       <div className="mt-3">
-        <h5>Select Start and Expiration Dates:</h5>
-        <div className="form-group">
-          <label>Start Date:</label>
-          <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>Expiration Date:</label>
-          <input type="date" className="form-control" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
-        </div>
+        <button className="btn btn-primary mb-3" onClick={toggleAdvancedSettings}>
+          {showAdvancedSettings ? "Hide Advanced Settings" : "Advanced Settings"}
+        </button>
+        {showAdvancedSettings && (
+          <div>
+            <div className="form-group">
+              <label>Start Date:</label>
+              <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label>Expiration Date:</label>
+              <input type="date" className="form-control" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
+            </div>
+          </div>
+        )}
       </div>
       <div className="mt-3">
         <button className="btn btn-primary mb-3" onClick={toggleUserData}>
