@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FiCopy } from 'react-icons/fi';
+import { AuthData } from "../../auth/AuthWrapper"
 
 const Shortner = () => {
+  const { user } = AuthData();
   const [inputLink, setInputLink] = useState("");
   const [shortenedLink, setShortenedLink] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
@@ -15,7 +17,7 @@ const Shortner = () => {
   const handleShortenURL = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/api/shorten", { originalUrl: inputLink });
+      const response = await axios.post("http://localhost:8000/api/shorten", { originalUrl: inputLink, email: user.name });
       setOriginalUrl(response.data.originalUrl);
       setShortenedLink(response.data.shortUrl);
     } catch (error) {
@@ -53,6 +55,7 @@ const Shortner = () => {
       {shortenedLink && (
         <div className="card">
           <div className="card-body">
+            <p>Username: {user.name}</p>
             <h5 className="card-title">Original URL:</h5>
             <p className="card-text">
               <a
