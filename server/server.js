@@ -93,15 +93,14 @@ app.post('/api/signup', async (req, res) => {
 // Create a model from the urlSchema
 const URL = mongoose.model('URL', urlSchema);
 
-// Generate shorter link and save to database
+// Generate shorter link with start and expiration dates and save to database
 app.post('/api/shorten', async (req, res) => {
   try {
-    const { originalUrl } = req.body; // Extract the URL from the request body
-    const { email } = req.body; // Extract the email from the request body
+    const { originalUrl, email, startDate, expirationDate } = req.body; // Extract URL, email, start date, and expiration date from the request body
     const shortUrl = generateShortUrl(); // Generate a short URL
 
-    // Save the original and short URL to the database
-    const newURL = new URL({ originalUrl, email, shortUrl });
+    // Save the original URL, email, short URL, start date, and expiration date to the database
+    const newURL = new URL({ originalUrl, email, shortUrl, startDate, expirationDate });
     await newURL.save();
 
     // Send the response back to the frontend
@@ -111,6 +110,7 @@ app.post('/api/shorten', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // Redirect to original URL when shortened URL is accessed
 app.get('/:shortUrl', async (req, res) => {

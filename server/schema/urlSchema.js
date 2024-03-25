@@ -5,6 +5,8 @@ const urlSchema = new mongoose.Schema({
   originalUrl: String,
   shortUrl: String,
   email: String,
+  startDate: Date,
+  expirationDate: Date,
   clickCount: { type: Number, default: 0 },
 }, { collection: 'shortener' }); // Specify the correct collection name here
 

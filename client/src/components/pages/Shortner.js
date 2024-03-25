@@ -11,6 +11,8 @@ const Shortner = () => {
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState([]);
   const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
+  const [startDate, setStartDate] = useState(""); // State variable for start date
+  const [expirationDate, setExpirationDate] = useState(""); // State variable for expiration date
 
   useEffect(() => {
     fetchUserData(user.name);
@@ -32,7 +34,7 @@ const Shortner = () => {
   const handleShortenURL = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/api/shorten", { originalUrl: inputLink, email: user.name });
+      const response = await axios.post("http://localhost:8000/api/shorten", { originalUrl: inputLink, email: user.name, startDate, expirationDate });
       setOriginalUrl(response.data.originalUrl);
       setShortenedLink(response.data.shortUrl);
     } catch (error) {
@@ -98,7 +100,18 @@ const Shortner = () => {
           </div>
         </div>
       )}
-      <div className="mt-5">
+      <div className="mt-3">
+        <h5>Select Start and Expiration Dates:</h5>
+        <div className="form-group">
+          <label>Start Date:</label>
+          <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Expiration Date:</label>
+          <input type="date" className="form-control" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
+        </div>
+      </div>
+      <div className="mt-3">
         <button className="btn btn-primary mb-3" onClick={toggleUserData}>
           {showUserData ? "Hide User Data" : "View User Data"}
         </button>
