@@ -40,11 +40,9 @@ app.post('/api/shorten', async (req, res) => {
     const { Originalurl } = req.body; // Extract the URL from the request body
     const shortUrl = Math.random().toString(36).substring(7); // Generate a random string
 
-    // Create a new URL document
-    const newURL = new URL({
-      originalUrl: Originalurl,
-      shortUrl: shortUrl,
-    });
+    // Save the original and short URL to the database
+    const newURL = new URL({ originalUrl: Originalurl, shortUrl });
+    await newURL.save();
 
     // Send the response back to the frontend
     res.json({ originalUrl: Originalurl, shortUrl: shortUrl });
