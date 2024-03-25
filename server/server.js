@@ -119,7 +119,17 @@ app.get('/:shortUrl', async (req, res) => {
     const urlData = await URL.findOne({ shortUrl });
 
     if (urlData) {
-      res.redirect(urlData.originalUrl);
+      const currentDate = new Date();
+      const startDate = new Date(urlData.startDate);
+      const expirationDate = new Date(urlData.expirationDate);
+
+      if (startDate > currentDate) {
+        res.status(400).send('Shortened URL is not available yet');
+      } else if (expirationDate > currentDate) {
+        res.redirect(urlData.originalUrl);
+      } else {
+        res.status(400).send('Shortened URL has expired');
+      }
     } else {
       res.status(404).send('URL not found');
     }
@@ -128,6 +138,7 @@ app.get('/:shortUrl', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 // Define an endpoint to fetch user data from the database
 app.get('/api/userData/:email', async (req, res) => {
