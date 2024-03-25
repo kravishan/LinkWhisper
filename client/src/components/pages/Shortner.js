@@ -104,21 +104,21 @@ const Shortner = () => {
             </tr>
           </thead>
           <tbody>
-            {userData.map((data, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>
-                  <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
-                    {data.originalUrl}
-                  </a>
-                </td>
-                <td>
-                  <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                    {`http://localhost:8000/${data.shortUrl}`}
-                  </a>
-                </td>
-              </tr>
-            ))}
+          {userData.map((data, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>
+                <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
+                  {data.originalUrl}
+                </a>
+              </td>
+              <td>
+                <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
+                  {`http://localhost:8000/${data.shortUrl}`}
+                </a>
+              </td>
+            </tr>
+          ))}
 
           </tbody>
         </table>
