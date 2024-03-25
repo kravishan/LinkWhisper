@@ -10,6 +10,7 @@ const Shortner = () => {
   const [originalUrl, setOriginalUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState([]);
+  const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
 
   useEffect(() => {
     fetchUserData(user.name);
@@ -42,6 +43,10 @@ const Shortner = () => {
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(`http://localhost:8000/${shortenedLink}`);
+  };
+
+  const toggleUserData = () => {
+    setShowUserData(!showUserData);
   };
 
   return (
@@ -94,34 +99,37 @@ const Shortner = () => {
         </div>
       )}
       <div className="mt-5">
-        <h3>User Data</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Original URL</th>
-              <th>Shortened URL</th>
-            </tr>
-          </thead>
-          <tbody>
-          {userData.map((data, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>
-                <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
-                  {data.originalUrl}
-                </a>
-              </td>
-              <td>
-                <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                  {`http://localhost:8000/${data.shortUrl}`}
-                </a>
-              </td>
-            </tr>
-          ))}
-
-          </tbody>
-        </table>
+        <button className="btn btn-primary mb-3" onClick={toggleUserData}>
+          {showUserData ? "Hide User Data" : "View User Data"}
+        </button>
+        {showUserData && (
+          <table className="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Original URL</th>
+                <th>Shortened URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {userData.map((data, index) => (
+                <tr key={index}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
+                      {data.originalUrl}
+                    </a>
+                  </td>
+                  <td>
+                    <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
+                      {`http://localhost:8000/${data.shortUrl}`}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
