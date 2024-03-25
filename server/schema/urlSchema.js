@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const urlSchema = new mongoose.Schema({
   originalUrl: String,
   shortUrl: String,
+  email: String,
   clickCount: { type: Number, default: 0 },
 }, { collection: 'shortener' }); // Specify the correct collection name here
 

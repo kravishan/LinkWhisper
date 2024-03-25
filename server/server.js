@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
 import { urlSchema } from './schema/urlSchema.js';
 import { User } from './schema/User.js';
 
@@ -33,6 +34,36 @@ mongoose.connect(MONGO_URL, {
   console.error('MongoDB connection error:', error);
 });
 
+app.post('/api/login', async (req, res) => {
+  try {
+    // Extract email and password from request body
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+
+    // If user not found, send error response
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Compare password with user's password stored in the database
+    if (password !== user.password) {
+      return res.status(401).json({ error: 'Incorrect password' });
+    }
+
+    // Passwords match, send success response
+    res.status(200).json({ message: 'Login successful' });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
+
 // Define a route for user signup
 app.post('/api/signup', async (req, res) => {
   try {
@@ -62,22 +93,15 @@ app.post('/api/signup', async (req, res) => {
 // Create a model from the urlSchema
 const URL = mongoose.model('URL', urlSchema);
 
-// Define a route for shortening URLs
+// Generate shorter link and save to database
 app.post('/api/shorten', async (req, res) => {
   try {
-    const { originalUrl, email } = req.body; // Extract the URL and email from the request body
-    
-    // Fetch the user from the database based on the provided email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Generate a short URL
-    const shortUrl = generateShortUrl();
+    const { originalUrl } = req.body; // Extract the URL from the request body
+    const { email } = req.body; // Extract the email from the request body
+    const shortUrl = generateShortUrl(); // Generate a short URL
 
     // Save the original and short URL to the database
-    const newURL = new URL({ originalUrl, shortUrl });
+    const newURL = new URL({ originalUrl, email, shortUrl });
     await newURL.save();
 
     // Send the response back to the frontend
