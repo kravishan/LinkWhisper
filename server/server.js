@@ -129,6 +129,20 @@ app.get('/:shortUrl', async (req, res) => {
   }
 });
 
+// Define an endpoint to fetch user data from the database
+app.get('/api/userData/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const userData = await URL.find({ email }); // Assuming URL is your Mongoose model
+    res.json(userData);
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 function generateShortUrl() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const length = Math.floor(Math.random() * (8 - 6 + 1)) + 6; // Random length between 6 and 8
