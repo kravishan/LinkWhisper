@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios"; // Import axios for making HTTP requests
+import axios from "axios";
 
 const Shortner = () => {
   const [inputLink, setInputLink] = useState("");
   const [shortenedLink, setShortenedLink] = useState("");
-  const [clickCount, setClickCount] = useState(0);
+  const [originalUrl, setOriginalUrl] = useState("");
 
   const handleInputChange = (event) => {
     setInputLink(event.target.value);
@@ -12,10 +12,9 @@ const Shortner = () => {
 
   const handleShortenURL = async () => {
     try {
-      // Send a POST request to the backend to generate the shortened URL
-      const response = await axios.post("/api/shorten", { url: inputLink });
-      setShortenedLink(response.data.shortenedLink);
-      setClickCount(response.data.clickCount);
+      const response = await axios.post("http://localhost:8000/api/shorten", { Originalurl: inputLink });
+      setOriginalUrl(response.data.originalUrl); // Set the original URL from the backend response
+      setShortenedLink(response.data.shortUrl); // Set the shortened URL from the backend response
     } catch (error) {
       console.error("Error shortening URL:", error);
     }
@@ -46,16 +45,14 @@ const Shortner = () => {
         <table className="table">
           <thead>
             <tr>
-              <th>Input Link</th>
-              <th>Shortened Link</th>
-              <th>Click Count</th>
+              <th>Original URL</th>
+              <th>Shortened URL</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>{inputLink}</td>
+              <td>{originalUrl}</td>
               <td>{shortenedLink}</td>
-              <td>{clickCount}</td>
             </tr>
           </tbody>
         </table>
