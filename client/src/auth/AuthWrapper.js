@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { RenderHeader } from "../components/structure/Header";
 import { RenderMenu, RenderRoutes } from "../components/structure/RenderNavigation";
@@ -7,7 +7,14 @@ const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
-  const [user, setUser] = useState({ name: "", isAuthenticated: false });
+  const [user, setUser] = useState(() => {
+    const storedUser = sessionStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : { name: "", isAuthenticated: false };
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("user", JSON.stringify(user));
+  }, [user]);
 
   const login = async (email, password) => {
     try {
