@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -12,9 +13,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
-const isLogged = false;
+
 
 app.use(bodyParser.json());
+
+// Configure session middleware
+app.use(session({
+  secret: 'your_secret_key', // Replace with your secret key for session encryption
+  resave: false,
+  saveUninitialized: false
+}));
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -55,7 +63,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Passwords match, set isLogged session variable
-    isLogged = true;
+    req.session.isLogged = true;
 
     // Passwords match, send success response
     res.status(200).json({ message: 'Login successful' });
@@ -127,7 +135,7 @@ app.get('/:shortUrl', async (req, res) => {
       const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
       const requireSignIn = urlData.requireSignIn || false;
 
-      if (isLogged === false && requireSignIn === true) {
+      if (requireSignIn && !req.session.isLogged) {
         // User is required to sign in but is not logged in
         return res.status(401).send('Please login to access this URL');
       }
