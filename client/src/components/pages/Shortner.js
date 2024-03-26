@@ -149,12 +149,15 @@ const Shortner = () => {
       </div>
 
 
-
       <div className="mt-3">
-        <button className="btn btn-primary mb-3" onClick={toggleUserData}>
-          {showUserData ? "Hide User Data" : "View User Data"}
-        </button>
-        {showUserData && (
+        {/* Check if userData array is not empty */}
+        {userData.length > 0 && (
+          <button className="btn btn-primary mb-3" onClick={toggleUserData}>
+            {showUserData ? "Hide User Data" : "View User Data"}
+          </button>
+        )}
+        {/* Check if showUserData is true and userData is not empty */}
+        {showUserData && userData.length > 0 && (
           <table className="table">
             <thead>
               <tr>
@@ -185,6 +188,7 @@ const Shortner = () => {
           </table>
         )}
       </div>
+
     </div>
   );
 };
