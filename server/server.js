@@ -14,12 +14,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 app.use(bodyParser.json());
 
 // Configure session middleware
 app.use(session({
-  secret: '66ddb75571c73611b17b37797e0a97b6',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false
 }));
