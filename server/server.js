@@ -96,11 +96,11 @@ const URL = mongoose.model('URL', urlSchema);
 // Generate shorter link with start and expiration dates and save to database
 app.post('/api/shorten', async (req, res) => {
   try {
-    const { originalUrl, email, startDate, expirationDate } = req.body; // Extract URL, email, start date, and expiration date from the request body
+    const { originalUrl, email, startDate, expirationDate, requireSignIn, sharedEmails } = req.body; // Extract URL, email, start date, and expiration date from the request body
     const shortUrl = generateShortUrl(); // Generate a short URL
 
     // Save the original URL, email, short URL, start date, and expiration date to the database
-    const newURL = new URL({ originalUrl, email, shortUrl, startDate, expirationDate });
+    const newURL = new URL({ originalUrl, email, shortUrl, startDate, expirationDate, requireSignIn, sharedEmails });
     await newURL.save();
 
     // Send the response back to the frontend
@@ -111,8 +111,6 @@ app.post('/api/shorten', async (req, res) => {
   }
 });
 
-
-// Redirect to original URL when shortened URL is accessed
 app.get('/:shortUrl', async (req, res) => {
   try {
     const { shortUrl } = req.params;
@@ -120,15 +118,21 @@ app.get('/:shortUrl', async (req, res) => {
 
     if (urlData) {
       const currentDate = new Date();
-      const startDate = new Date(urlData.startDate);
-      const expirationDate = new Date(urlData.expirationDate);
+      const startDate = urlData.startDate ? new Date(urlData.startDate) : null;
+      const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
 
-      if (startDate > currentDate) {
-        res.status(400).send('Shortened URL is not available yet');
-      } else if (expirationDate > currentDate) {
+      if (startDate === null && expirationDate === null) {
+        // No start date and no expiration date, URL is accessible
         res.redirect(urlData.originalUrl);
-      } else {
+      } else if (startDate !== null && startDate > currentDate) {
+        // Start date is in the future, URL is not yet available
+        res.status(400).send('Shortened URL is not available yet');
+      } else if (expirationDate !== null && expirationDate < currentDate) {
+        // Expiration date is in the past, URL has expired
         res.status(400).send('Shortened URL has expired');
+      } else {
+        // URL is accessible
+        res.redirect(urlData.originalUrl);
       }
     } else {
       res.status(404).send('URL not found');
@@ -138,7 +142,6 @@ app.get('/:shortUrl', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
 
 // Define an endpoint to fetch user data from the database
 app.get('/api/userData/:email', async (req, res) => {
