@@ -12,6 +12,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
+const isLogged = false;
 
 app.use(bodyParser.json());
 
@@ -34,6 +35,7 @@ mongoose.connect(MONGO_URL, {
   console.error('MongoDB connection error:', error);
 });
 
+
 app.post('/api/login', async (req, res) => {
   try {
     // Extract email and password from request body
@@ -51,6 +53,9 @@ app.post('/api/login', async (req, res) => {
     if (password !== user.password) {
       return res.status(401).json({ error: 'Incorrect password' });
     }
+
+    // Passwords match, set isLogged session variable
+    isLogged = true;
 
     // Passwords match, send success response
     res.status(200).json({ message: 'Login successful' });
@@ -120,6 +125,12 @@ app.get('/:shortUrl', async (req, res) => {
       const currentDate = new Date();
       const startDate = urlData.startDate ? new Date(urlData.startDate) : null;
       const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
+      const requireSignIn = urlData.requireSignIn || false;
+
+      if (isLogged === false && requireSignIn === true) {
+        // User is required to sign in but is not logged in
+        return res.status(401).send('Please login to access this URL');
+      }
 
       if (startDate === null && expirationDate === null) {
         // No start date and no expiration date, URL is accessible
@@ -142,6 +153,7 @@ app.get('/:shortUrl', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
 
 // Define an endpoint to fetch user data from the database
 app.get('/api/userData/:email', async (req, res) => {
