@@ -159,8 +159,8 @@ app.get('/:shortUrl', async (req, res) => {
       console.log('requireSignIn', requireSignIn);
       console.log('req.session.isLogged', req.session.isLogged);
 
-      if (requireSignIn && req.session.isLogged === undefined) {
-        return res.status(401).send('Please login to access this URL');
+      if (requireSignIn === true) {
+        return res.redirect(`http://localhost:3000/Protected?shortUrl=${shortUrl}`);
       }
 
       if (startDate === null && expirationDate === null) {
