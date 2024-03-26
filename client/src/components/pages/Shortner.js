@@ -161,6 +161,7 @@ const Shortner = () => {
                 <th>#</th>
                 <th>Original URL</th>
                 <th>Shortened URL</th>
+                <th>Open Count</th>
               </tr>
             </thead>
             <tbody>
@@ -177,6 +178,7 @@ const Shortner = () => {
                       {`http://localhost:8000/${data.shortUrl}`}
                     </a>
                   </td>
+                  <td>{data.openCount}</td>
                 </tr>
               ))}
             </tbody>

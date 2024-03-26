@@ -9,7 +9,7 @@ const urlSchema = new mongoose.Schema({
   expirationDate: { type: Date, default: 0 },
   requireSignIn: Boolean,
   sharedEmails: [String],
-  clickCount: { type: Number, default: 0 },
+  openCount: { type: Number, default: 0 },
 }, { collection: 'shortener' }); // Specify the correct collection name here
 
 const URL = mongoose.model('URL', urlSchema);

@@ -85,7 +85,16 @@ passport.deserializeUser(async (id, done) => {
 
 // Login endpoint using Passport
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
+  req.session.isLogged = true;
   res.status(200).json({ message: 'Login successful' });
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+  // Clear isLogged from the session upon logout
+  req.session.isLogged = false;
+  req.logout(); // Optional: If you are using passport, you can also call req.logout() to remove the user from the session
+  res.status(200).json({ message: 'Logout successful' });
 });
 
 // Signup endpoint
@@ -138,13 +147,19 @@ app.get('/:shortUrl', async (req, res) => {
     const urlData = await URL.findOne({ shortUrl });
 
     if (urlData) {
+      // Increment the openCount
+      urlData.openCount++;
+      await urlData.save(); // Save the updated document with incremented openCount
+
       const currentDate = new Date();
       const startDate = urlData.startDate ? new Date(urlData.startDate) : null;
       const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
       const requireSignIn = urlData.requireSignIn || false;
 
-      if (requireSignIn && !req.session.isLogged) {
-        // User is required to sign in but is not logged in
+      console.log('requireSignIn', requireSignIn);
+      console.log('req.session.isLogged', req.session.isLogged);
+
+      if (requireSignIn && req.session.isLogged === undefined) {
         return res.status(401).send('Please login to access this URL');
       }
 
@@ -154,7 +169,7 @@ app.get('/:shortUrl', async (req, res) => {
       } else if (startDate !== null && startDate > currentDate) {
         // Start date is in the future, URL is not yet available
         res.status(400).send('Shortened URL is not available yet');
-      } else if (expirationDate !== null && expirationDate < currentDate) {
+      } else if (expirationDate !== null && expirationDate <= currentDate) {
         // Expiration date is in the past, URL has expired
         res.status(400).send('Shortened URL has expired');
       } else {
