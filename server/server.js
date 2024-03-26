@@ -4,9 +4,10 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
 import { urlSchema } from './schema/urlSchema.js';
 import { User } from './schema/User.js';
-
 
 dotenv.config();
 
@@ -14,19 +15,22 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
 
-
 app.use(bodyParser.json());
 
 // Configure session middleware
 app.use(session({
-  secret: 'your_secret_key', // Replace with your secret key for session encryption
+  secret: '66ddb75571c73611b17b37797e0a97b6',
   resave: false,
   saveUninitialized: false
 }));
 
+// Initialize Passport and session for authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
 // CORS middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // Allow requests from any origin
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
@@ -43,65 +47,68 @@ mongoose.connect(MONGO_URL, {
   console.error('MongoDB connection error:', error);
 });
 
-
-app.post('/api/login', async (req, res) => {
+// Passport Local Strategy for authentication
+passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
   try {
-    // Extract email and password from request body
-    const { email, password } = req.body;
-
-    // Find user by email
     const user = await User.findOne({ email });
 
-    // If user not found, send error response
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return done(null, false, { message: 'User not found' });
     }
 
-    // Compare password with user's password stored in the database
-    if (password !== user.password) {
-      return res.status(401).json({ error: 'Incorrect password' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return done(null, false, { message: 'Incorrect password' });
     }
 
-    // Passwords match, set isLogged session variable
-    req.session.isLogged = true;
-
-    // Passwords match, send success response
-    res.status(200).json({ message: 'Login successful' });
+    return done(null, user);
   } catch (error) {
-    console.error('Error logging in:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return done(error);
+  }
+}));
+
+// Serialize user for session
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Deserialize user from session
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
   }
 });
 
+// Login endpoint using Passport
+app.post('/api/login', passport.authenticate('local'), (req, res) => {
+  res.status(200).json({ message: 'Login successful' });
+});
 
-
-
-
-// Define a route for user signup
+// Signup endpoint
 app.post('/api/signup', async (req, res) => {
   try {
-    // Extract user data from request body
     const { userName, email, password } = req.body;
-
-    // Check if user with the provided email already exists in the database
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
-    // Create a new user document
-    const newUser = new User({ userName, email, password });
-    
-    // Save the new user to the database
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+    const newUser = new User({ userName, email, password: hashedPassword }); // Save the hashed password
     await newUser.save();
 
-    // Send a success response
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
 
 // Create a model from the urlSchema
 const URL = mongoose.model('URL', urlSchema);
