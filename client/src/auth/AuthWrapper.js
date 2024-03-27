@@ -2,25 +2,22 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { RenderHeader } from "../components/structure/Header";
 import { RenderMenu, RenderRoutes } from "../components/structure/RenderNavigation";
+import Cookies from "./cookieJWTAuth";
 
 const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
-  const [user, setUser] = useState(() => {
-    const storedUser = sessionStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : { name: "", isAuthenticated: false };
-  });
-
-  useEffect(() => {
-    sessionStorage.setItem("user", JSON.stringify(user));
-  }, [user]);
+  const [user, setUser] = useState({ name: "", isAuthenticated: false });
 
   const login = async (email, password) => {
     try {
       const response = await axios.post("http://localhost:8000/api/login", { email, password });
 
       if (response.status === 200) {
+        // Save token in cookies
+        const token = response.data.accessToken;
+        Cookies.set("token", token, { expires: 7 }); // Set cookie expiration to 7 days
         setUser({ name: email, isAuthenticated: true });
         return "success"; // Return success if login is successful
       } else if (response.status === 401) {
@@ -36,8 +33,18 @@ export const AuthWrapper = () => {
   };
 
   const logout = () => {
+    // Remove token from cookies
+    Cookies.remove("token");
     setUser({ ...user, isAuthenticated: false });
   };
+
+  useEffect(() => {
+    // Check if user is already logged in by checking the presence of token in cookies
+    const token = Cookies.get("token");
+    if (token) {
+      setUser({ isAuthenticated: true });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
