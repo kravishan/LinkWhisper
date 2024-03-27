@@ -1,5 +1,5 @@
 import express from 'express';
-import session from 'express-session';
+import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -14,20 +14,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
-const SESSION_SECRET = process.env.SESSION_SECRET;
 
 app.use(bodyParser.json());
-
-// Configure session middleware
-app.use(session({
-  secret: SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false
-}));
-
-// Initialize Passport and session for authentication
-app.use(passport.initialize());
-app.use(passport.session());
 
 // CORS middleware
 app.use((req, res, next) => {
@@ -47,6 +35,7 @@ mongoose.connect(MONGO_URL, {
 .catch((error) => {
   console.error('MongoDB connection error:', error);
 });
+
 
 // Passport Local Strategy for authentication
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
@@ -83,6 +72,19 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, userEmail) => {
+    if (err) return res.sendStatus(403);
+    req.userEmail = userEmail;
+    next();
+  })
+}
+
 // Login endpoint using Passport
 app.post('/api/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
@@ -93,9 +95,16 @@ app.post('/api/login', (req, res, next) => {
       // User not found or incorrect email/password
       return res.status(400).json({ error: info.message });
     }
-    req.session.isLogged = true;
+
+    const userEmail = user.email;
+
+    const accessToken = jwt.sign({ email: userEmail }, process.env.JWT_SECRET);
+
+    console.log('Token:', accessToken);
+
+
     // Send success message
-    return res.status(200).json({ message: 'Login successful' });
+    return res.status(200).json({ accessToken: accessToken });
   })(req, res, next);
 });
 
@@ -103,7 +112,6 @@ app.post('/api/login', (req, res, next) => {
 // Logout endpoint
 app.post('/api/logout', (req, res) => {
   // Clear isLogged from the session upon logout
-  req.session.isLogged = false;
   req.logout(); // Optional: If you are using passport, you can also call req.logout() to remove the user from the session
   // Send success message
   res.status(200).json({ message: 'Logout successful' });
@@ -169,9 +177,6 @@ app.get('/:shortUrl', async (req, res) => {
       const startDate = urlData.startDate ? new Date(urlData.startDate) : null;
       const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
       const requireSignIn = urlData.requireSignIn || false;
-
-      console.log('requireSignIn', requireSignIn);
-      console.log('req.session.isLogged', req.session.isLogged);
 
       if (requireSignIn === true) {
         return res.redirect(`http://localhost:3000/protected?shortUrl=${shortUrl}`);
