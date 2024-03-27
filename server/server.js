@@ -11,6 +11,8 @@ import { urlSchema } from './schema/urlSchema.js';
 import { User } from './schema/User.js';
 import sgMail from '@sendgrid/mail';
 import SibApiV3Sdk from 'sib-api-v3-sdk';
+import generateEmailContent  from './models/template.js';
+
 
 dotenv.config();
 
@@ -274,12 +276,13 @@ app.post('/api/send-email', async (req, res) => {
       }
     ];
 
+    const htmlContent = generateEmailContent(originalUrl); // Generate HTML email content using the template function
+
     const sendEmail = await apiInstance.sendTransacEmail({
       sender,
       to: receivers,
       subject: 'Test Email',
-      textContent: `Here is the link you requested: ${originalUrl}`, // Include original URL in email content
-      htmlContent: `<html><body><h1>Here is the link you requested:</h1><a href="${originalUrl}">${originalUrl}</a></body></html>` // Include original URL as a clickable link in email content
+      htmlContent: htmlContent, // Use the generated HTML content for the email
     });
     
     return res.json({ message: 'Email sent successfully' });
@@ -289,6 +292,7 @@ app.post('/api/send-email', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 
 
