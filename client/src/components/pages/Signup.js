@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { TextField, Button, Typography, Snackbar } from "@mui/material";
+import { TextField, Button, Snackbar } from "@mui/material";
 import { Alert } from "@mui/material";
 import "../style/login.css";
 
@@ -22,10 +22,19 @@ export const Signup = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false); // Close the snackbar
+  };
+
   const doSignup = async () => {
     try {
       if (formData.password !== formData.confirmPassword) {
-        throw new Error("Passwords do not match");
+        setErrorMessage("Passwords do not match");
+        setOpen(true);
+        return; // Exit the function early if passwords don't match
       }
 
       const response = await axios.post(
@@ -42,12 +51,14 @@ export const Signup = () => {
         }, 2000); // Redirect after 2 seconds
       }
     } catch (error) {
-      setErrorMessage(error.response.data.error || "An error occurred");
+      if (error.response && error.response.data && error.response.data.error) {
+        // Extract the error message from the response data
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage("An error occurred");
+      }
+      setOpen(true);
     }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   return (
@@ -91,19 +102,19 @@ export const Signup = () => {
           className="input"
         />
         <div className="button">
-          <Button variant="contained" onClick={doSignup} color="primary" class="btn-txt">
+          <Button variant="contained" onClick={doSignup} color="primary">
             Sign Up
           </Button>
         </div>
         {errorMessage && (
-          <Snackbar open={true} autoHideDuration={6000} onClose={handleClose}>
+          <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
             <Alert onClose={handleClose} severity="error">
               {errorMessage}
             </Alert>
           </Snackbar>
         )}
         {successMessage && (
-          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+          <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
             <Alert onClose={handleClose} severity="success">
               {successMessage}
             </Alert>

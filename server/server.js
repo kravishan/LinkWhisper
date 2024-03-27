@@ -84,16 +84,28 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // Login endpoint using Passport
-app.post('/api/login', passport.authenticate('local'), (req, res) => {
-  req.session.isLogged = true;
-  res.status(200).json({ message: 'Login successful' });
+app.post('/api/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    if (!user) {
+      // User not found or incorrect email/password
+      return res.status(400).json({ error: info.message });
+    }
+    req.session.isLogged = true;
+    // Send success message
+    return res.status(200).json({ message: 'Login successful' });
+  })(req, res, next);
 });
+
 
 // Logout endpoint
 app.post('/api/logout', (req, res) => {
   // Clear isLogged from the session upon logout
   req.session.isLogged = false;
   req.logout(); // Optional: If you are using passport, you can also call req.logout() to remove the user from the session
+  // Send success message
   res.status(200).json({ message: 'Logout successful' });
 });
 
@@ -111,9 +123,11 @@ app.post('/api/signup', async (req, res) => {
     const newUser = new User({ userName, email, password: hashedPassword }); // Save the hashed password
     await newUser.save();
 
+    // Send success message
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error registering user:', error);
+    // Send internal server error message
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

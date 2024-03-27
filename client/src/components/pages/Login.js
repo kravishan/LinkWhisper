@@ -1,4 +1,4 @@
-import { useReducer, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthData } from "../../auth/AuthWrapper";
 import { TextField, Button, Snackbar } from "@mui/material";
@@ -8,13 +8,9 @@ import "../style/login.css";
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = AuthData();
-  const [formData, setFormData] = useReducer(
-    (formData, newItem) => {
-      return { ...formData, ...newItem };
-    },
-    { userName: "", password: "" }
-  );
+  const [formData, setFormData] = useState({ userName: "", password: "" });
   const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [open, setOpen] = useState(false);
 
   const handleInputChange = (e) => {
@@ -22,16 +18,24 @@ export const Login = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false); // Close the snackbar
   };
 
   const doLogin = async () => {
     try {
       await login(formData.userName, formData.password);
-      navigate("/account");
+      setSuccessMessage("Login successful");
+      setOpen(true);
+      setTimeout(() => {
+        setOpen(false); // Close the snackbar after 6 seconds
+        navigate("/account");
+      }, 500); // Redirect after 6 seconds
     } catch (error) {
-      setErrorMessage(error.response.data.error || "An error occurred");
+      setErrorMessage(error.response?.data?.error || "An error occurred");
       setOpen(true);
     }
   };
@@ -68,9 +72,16 @@ export const Login = () => {
           </Button>
         </div>
         {errorMessage && (
-          <Snackbar open={true} autoHideDuration={6000} onClose={handleClose}>
+          <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
             <Alert onClose={handleClose} severity="error">
               {errorMessage}
+            </Alert>
+          </Snackbar>
+        )}
+        {successMessage && (
+          <Snackbar open={open} autoHideDuration={1000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="success">
+              {successMessage}
             </Alert>
           </Snackbar>
         )}
