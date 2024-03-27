@@ -53,7 +53,6 @@ export const Login = () => {
           variant="outlined"
           className="input"
           fullWidth
-          InputLabelProps={{ shrink: true }}
         />
         <TextField
           name="password"
@@ -64,7 +63,6 @@ export const Login = () => {
           variant="outlined"
           className="input"
           fullWidth
-          InputLabelProps={{ shrink: true }}
         />
         <div className="button">
           <Button variant="contained" onClick={doLogin} color="primary">

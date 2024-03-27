@@ -22,7 +22,7 @@ export const Protected = () => {
           This is a protected link
         </Typography>
         <Box className="protectedButton">
-          <Button variant="contained" onClick={handleButtonClick}>
+          <Button class="btn-show-link" variant="contained" onClick={handleButtonClick}>
             {showLink ? 'Hide Link' : 'Show Link'}
           </Button>
         </Box>
