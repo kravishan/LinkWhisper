@@ -2,6 +2,12 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import './style/account.css';
 
+const MAX_URL_LENGTH = 30; // Maximum number of characters to display for the original URL
+
+const truncateUrl = (url) => {
+  return url.length > MAX_URL_LENGTH ? url.slice(0, MAX_URL_LENGTH) + '...' : url;
+};
+
 const UserDataTable = ({ userData }) => {
   return (
     <div>
@@ -22,7 +28,7 @@ const UserDataTable = ({ userData }) => {
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
-                    {data.originalUrl}
+                    {truncateUrl(data.originalUrl)}
                   </a>
                 </TableCell>
                 <TableCell>
