@@ -35,7 +35,7 @@ export const Account = () => {
   return (
     <div>
       <h2 className="mb-4 text">Dashboard</h2>
-      <div className="dashboard-container">
+      <div className="dashboard-container" style={{ display: 'flex'}}>
         <Card className="record-card">
           <CardContent>
             <Typography variant="h6" component="div">
