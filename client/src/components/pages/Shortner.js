@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FiCopy } from 'react-icons/fi';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from '@fortawesome/free-solid-svg-icons'; // Import the cog icon
+import { faLink } from '@fortawesome/free-solid-svg-icons'; // Import the faLink icon
 import { AuthData } from "../../auth/AuthWrapper";
+import '../style/shortner.css';
+import Table from '../userRecoard';
 
 const Shortner = () => {
   const { user } = AuthData();
@@ -16,7 +21,6 @@ const Shortner = () => {
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false); // State variable to toggle advanced settings visibility
   const [requireSignIn, setRequireSignIn] = useState(false);
   const [sharedEmails, setSharedEmails] = useState([]);
-
 
   useEffect(() => {
     fetchUserData(user.name);
@@ -60,9 +64,9 @@ const Shortner = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">URL Shortener</h2>
-      <div className="input-group mb-3">
+    <div className="container mt-5" style={{ position: 'relative' }}>
+      <h2 className="mb-4 text">URL Shortener</h2>
+      <div className="url-box" style={{ position: 'relative' }}>
         <input
           type="text"
           className="form-control"
@@ -70,21 +74,36 @@ const Shortner = () => {
           value={inputLink}
           onChange={handleInputChange}
         />
+        <button className="btn btn-settings" onClick={toggleAdvancedSettings} style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)' }}>
+          <FontAwesomeIcon icon={faCog} className="mr-2" />
+          {showAdvancedSettings ? "" : ""}
+        </button>
+      </div>
+      
+      <div className="input-group mt-3">
         <div className="input-group-append">
           <button
-            className="btn btn-primary"
+            className="btn-shorten"
             type="button"
             onClick={handleShortenURL}
             disabled={loading || !inputLink.trim()}
           >
-            {loading ? "Shortening..." : "Shorten"}
-          </button>
+            {loading ? "Shortening..." : (
+        <>
+          <FontAwesomeIcon icon={faLink} className="mr-2" /> 
+          Shorten
+        </>
+      )}
+    </button>
         </div>
       </div>
+
+
+
       {shortenedLink && (
         <div className="card mb-3">
           <div className="card-body">
-            <h5 className="card-title">Original URL:</h5>
+            <h5 className="card-title text">Original URL:</h5>
             <p className="card-text">
               <a
                 href={originalUrl}
@@ -94,7 +113,7 @@ const Shortner = () => {
                 {originalUrl}
               </a>
             </p>
-            <h5 className="card-title">Shortened URL:</h5>
+            <h5 className="card-title text">Shortened URL:</h5>
             <p className="card-text">
               <a
                 href={`http://localhost:8000/${shortenedLink}`}
@@ -109,86 +128,49 @@ const Shortner = () => {
         </div>
       )}
       
-      
       <div className="mt-3">
-        <button className="btn btn-primary mb-3" onClick={toggleAdvancedSettings}>
-          {showAdvancedSettings ? "Hide Advanced Settings" : "Advanced Settings"}
-        </button>
         {showAdvancedSettings && (
-          <div>
-            <div className="form-group">
-              <label>Start Date:</label>
-              <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          <div className="row">
+            <div className="col-md-6">
+              <div className="form-group">
+                <label>Start Date:</label>
+                <input type="date" className="form-control" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
             </div>
-            <div className="form-group">
-              <label>Expiration Date:</label>
-              <input type="date" className="form-control" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
+            <div className="col-md-6">
+              <div className="form-group">
+                <label>Expiration Date:</label>
+                <input type="date" className="form-control" value={expirationDate} onChange={(e) => setExpirationDate(e.target.value)} />
+              </div>
             </div>
-
-            <div className="form-check">
-              <input type="checkbox" className="form-check-input" id="requireSignIn" onChange={(e) => setRequireSignIn(e.target.checked)} />
-              <label className="form-check-label" htmlFor="requireSignIn">Require Sign In to Access</label>
-            </div> 
-
-            <div className="form-group">
-              <label htmlFor="shareWithEmail">Share with:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="shareWithEmail"
-                placeholder="Enter email addresses separated by commas"
-                onChange={(e) => {
-                  const emails = e.target.value.split(',').map(email => email.trim());
-                  setSharedEmails(emails);
-                }}
-              />
+            <div className="col-md-6">
+              <div className="form-check" style={{ fontSize: '1.1rem', padding: '2.5rem' }}>
+                <input type="checkbox" className="form-check-input" id="requireSignIn" onChange={(e) => setRequireSignIn(e.target.checked)} />
+                <label className="form-check-label" htmlFor="requireSignIn">Require Sign In to Access</label>
+              </div>
             </div>
-        
+            <div className="col-md-6">
+              <div className="form-group">
+                <label htmlFor="shareWithEmail">Share with:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="shareWithEmail"
+                  placeholder="Enter email addresses separated by commas"
+                  onChange={(e) => {
+                    const emails = e.target.value.split(',').map(email => email.trim());
+                    setSharedEmails(emails);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
 
 
-      <div className="mt-3">
-        {/* Check if userData array is not empty */}
-        {userData.length > 0 && (
-          <button className="btn btn-primary mb-3" onClick={toggleUserData}>
-            {showUserData ? "Hide User Data" : "View User Data"}
-          </button>
-        )}
-        {/* Check if showUserData is true and userData is not empty */}
-        {showUserData && userData.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Original URL</th>
-                <th>Shortened URL</th>
-                <th>Open Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {userData.map((data, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>
-                    <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
-                      {data.originalUrl}
-                    </a>
-                  </td>
-                  <td>
-                    <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
-                      {`http://localhost:8000/${data.shortUrl}`}
-                    </a>
-                  </td>
-                  <td>{data.openCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
 
+      
     </div>
   );
 };
