@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { FiCopy } from 'react-icons/fi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -14,7 +14,7 @@ const Shortner = () => {
   const [shortenedLink, setShortenedLink] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
+  // const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
   const [startDate, setStartDate] = useState(""); // State variable for start date
   const [expirationDate, setExpirationDate] = useState(""); // State variable for expiration date
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false); // State variable to toggle advanced settings visibility
@@ -43,9 +43,9 @@ const Shortner = () => {
     navigator.clipboard.writeText(`http://localhost:8000/${shortenedLink}`);
   };
 
-  const toggleUserData = () => {
-    setShowUserData(!showUserData);
-  };
+  // const toggleUserData = () => {
+  //   setShowUserData(!showUserData);
+  // };
 
   const toggleAdvancedSettings = () => {
     setShowAdvancedSettings(!showAdvancedSettings);

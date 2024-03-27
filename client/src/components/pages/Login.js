@@ -1,6 +1,9 @@
 import { useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthData } from "../../auth/AuthWrapper";
+import { TextField, Button, Snackbar } from "@mui/material";
+import { Alert } from "@mui/material";
+import "../style/login.css";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -12,44 +15,65 @@ export const Login = () => {
     { userName: "", password: "" }
   );
   const [errorMessage, setErrorMessage] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const doLogin = async () => {
     try {
       await login(formData.userName, formData.password);
       navigate("/account");
     } catch (error) {
-      setErrorMessage(error);
+      setErrorMessage(error.response.data.error || "An error occurred");
+      setOpen(true);
     }
   };
 
   return (
     <div className="page">
-      <h2>Login page</h2>
+      <h2 className="mb-4 text">Login</h2>
       <div className="inputs">
-        <div className="input">
-          <input
-            value={formData.userName}
-            onChange={(e) =>
-              setFormData({ userName: e.target.value, password: formData.password })
-            }
-            type="text"
-            placeholder="Username"
-          />
-        </div>
-        <div className="input">
-          <input
-            value={formData.password}
-            onChange={(e) =>
-              setFormData({ userName: formData.userName, password: e.target.value })
-            }
-            type="password"
-            placeholder="Password"
-          />
-        </div>
+        <TextField
+          name="userName"
+          value={formData.userName}
+          onChange={handleInputChange}
+          type="text"
+          label="Username"
+          variant="outlined"
+          className="input"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          name="password"
+          value={formData.password}
+          onChange={handleInputChange}
+          type="password"
+          label="Password"
+          variant="outlined"
+          className="input"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+        />
         <div className="button">
-          <button onClick={doLogin}>Log in</button>
+          <Button variant="contained" onClick={doLogin} color="primary">
+            Log in
+          </Button>
         </div>
-        {errorMessage ? <div className="error">{errorMessage}</div> : null}
+        {errorMessage && (
+          <Snackbar open={true} autoHideDuration={6000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="error">
+              {errorMessage}
+            </Alert>
+          </Snackbar>
+        )}
       </div>
     </div>
   );
