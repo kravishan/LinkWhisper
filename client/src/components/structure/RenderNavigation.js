@@ -34,9 +34,8 @@ export const RenderMenu = () => {
   return (
     <div className="menu">
       {nav.map((r, i) => {
-        if (!r.isPrivate && r.isMenu) {
-          return <MenuItem key={i} r={r} />;
-        } else if (user.isAuthenticated && r.isMenu) {
+        if ((!user.isAuthenticated && r.isMenu) ||              // Show if user is not authenticated and isMenu
+            (user.isAuthenticated && r.isMenu && r.isLogged !== false)) {  // Or if user is authenticated, isMenu, and isLogged is not false
           return <MenuItem key={i} r={r} />;
         } else {
           return null;
@@ -55,3 +54,4 @@ export const RenderMenu = () => {
     </div>
   );
 };
+
