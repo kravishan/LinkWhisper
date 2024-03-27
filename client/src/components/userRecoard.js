@@ -1,47 +1,43 @@
-import React from "react";
+import React from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import './style/account.css';
 
-const Table = ({ userData, showUserData, toggleUserData }) => {
+const UserDataTable = ({ userData }) => {
   return (
-    <div className="mt-3">
-      {/* Check if userData array is not empty */}
-      {userData.length > 0 && (
-        <button className="btn btn-user-data mb-3" onClick={toggleUserData}>
-          {showUserData ? "Hide User Data" : "View User Data"}
-        </button>
-      )}
-      {/* Check if showUserData is true and userData is not empty */}
-      {showUserData && userData.length > 0 && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Original URL</th>
-              <th>Shortened URL</th>
-              <th>Open Count</th>
-            </tr>
-          </thead>
-          <tbody>
+    <div>
+      <h3 className="table-header">Your All History Records</h3>
+      <TableContainer component={Paper} className="custom-table-container">
+        <Table aria-label="user data table" className="custom-table">
+          <TableHead>
+            <TableRow>
+              <TableCell>#</TableCell>
+              <TableCell>Original URL</TableCell>
+              <TableCell>Shortened URL</TableCell>
+              <TableCell>Open Count</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {userData.map((data, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>
                   <a href={data.originalUrl} target="_blank" rel="noopener noreferrer">
                     {data.originalUrl}
                   </a>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <a href={`http://localhost:8000/${data.shortUrl}`} target="_blank" rel="noopener noreferrer">
                     {`http://localhost:8000/${data.shortUrl}`}
                   </a>
-                </td>
-                <td>{data.openCount}</td>
-              </tr>
+                </TableCell>
+                <TableCell>{data.openCount}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 };
 
-export default Table;
+export default UserDataTable;

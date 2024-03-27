@@ -6,7 +6,7 @@ import { faCog } from '@fortawesome/free-solid-svg-icons'; // Import the cog ico
 import { faLink } from '@fortawesome/free-solid-svg-icons'; // Import the faLink icon
 import { AuthData } from "../../auth/AuthWrapper";
 import '../style/shortner.css';
-import Table from '../userRecoard';
+
 
 const Shortner = () => {
   const { user } = AuthData();
@@ -14,7 +14,6 @@ const Shortner = () => {
   const [shortenedLink, setShortenedLink] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState([]);
   const [showUserData, setShowUserData] = useState(false); // State variable to toggle table visibility
   const [startDate, setStartDate] = useState(""); // State variable for start date
   const [expirationDate, setExpirationDate] = useState(""); // State variable for expiration date
@@ -22,18 +21,7 @@ const Shortner = () => {
   const [requireSignIn, setRequireSignIn] = useState(false);
   const [sharedEmails, setSharedEmails] = useState([]);
 
-  useEffect(() => {
-    fetchUserData(user.name);
-  }, []);
-
-  const fetchUserData = async (userEmail) => {
-    try {
-      const response = await axios.get(`http://localhost:8000/api/userData/${userEmail}`);
-      setUserData(response.data);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
+  
 
   const handleInputChange = (event) => {
     setInputLink(event.target.value);
