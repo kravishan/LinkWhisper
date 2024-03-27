@@ -1,28 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { AuthData } from '../../auth/AuthWrapper';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import '../style/protected.css'; 
 
 export const Protected = () => {
   const { user } = AuthData();
-  const [isAuthenticated, setIsAuthenticated] = useState(user.isAuthenticated);
 
-  useEffect(() => {
-    // Set isAuthenticated to true if user is logged in
-    if (user.isAuthenticated) {
-      setIsAuthenticated(true);
-    } else {
-      // Retrieve the stored user object from sessionStorage
-      const storedUser = sessionStorage.getItem('user');
-      // Parse the storedUser string to convert it back to an object
-      const parsedUser = JSON.parse(storedUser);
-      // Set isAuthenticated based on stored user data
-      setIsAuthenticated(parsedUser.isAuthenticated);
-    }
-  }, [user.isAuthenticated]);
+  const [showLink, setShowLink] = useState(false);
+
+  const handleButtonClick = () => {
+    setShowLink(!showLink);
+  };
 
   return (
-    <div className="protected">
-      <h2>Protected page</h2>
-      {/* Your protected page content here */}
-    </div>
+    <Box className="protectedContainer">
+      <Paper className="protectedPaper" elevation={5}>
+        <Typography variant="h4" gutterBottom className="protectedTitle">
+          This is a protected link
+        </Typography>
+        <Box className="protectedButton">
+          <Button variant="contained" onClick={handleButtonClick}>
+            {showLink ? 'Hide Link' : 'Show Link'}
+          </Button>
+        </Box>
+        {showLink && (
+          <Box className="protectedLink">
+            {/* Your protected page content here */}
+            <a href="/protected-link">Protected Link</a>
+          </Box>
+        )}
+      </Paper>
+    </Box>
   );
 };
