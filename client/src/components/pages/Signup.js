@@ -47,7 +47,7 @@ export const Signup = () => {
         setOpen(true);
         setTimeout(() => {
           setSuccessMessage("");
-          navigate("/account");
+          navigate("/login");
         }, 2000); // Redirect after 2 seconds
       }
     } catch (error) {
