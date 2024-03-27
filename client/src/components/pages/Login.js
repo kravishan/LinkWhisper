@@ -33,7 +33,7 @@ export const Login = () => {
       setTimeout(() => {
         setOpen(false); // Close the snackbar after 6 seconds
         navigate("/account");
-      }, 500); // Redirect after 6 seconds
+      }, 500); 
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "An error occurred");
       setOpen(true);
