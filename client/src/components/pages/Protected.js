@@ -11,6 +11,7 @@ import axios from 'axios'; // Import Axios for making HTTP requests
 import Cookies from '../../auth/cookieJWTAuth'; // Import the Cookies module
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import sendEmail from '../../services/sendEmail';
 
 export const Protected = () => {
   const { user } = AuthData();
@@ -27,8 +28,8 @@ export const Protected = () => {
   // Function to handle sending email request
   const handleSendEmail = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/api/send-link', { email, shortUrl });
-      console.log(response.data); // Assuming backend responds with success message
+      await sendEmail(email, shortUrl); // Call the sendEmail function
+      console.log('Email sent successfully');
     } catch (error) {
       console.error('Error sending email:', error);
     }
@@ -51,12 +52,11 @@ export const Protected = () => {
         const originalUrl = response.data.originalUrl;
         window.location.href = originalUrl; // Redirect to the original URL
       } catch (error) {
-        console.error('Error fetching original URL:', error);
       }
     };
 
-    // If the user is logged in, fetch the original URL
-    if (user.isAuthenticated) {
+    // If the user is not logged in, fetch the original URL
+    if (!user.isAuthenticated) {
       fetchOriginalUrl();
     }
   }, [shortUrl, user]);
@@ -71,20 +71,19 @@ export const Protected = () => {
           </Typography>
 
           <Typography class="email-txt" gutterBottom className="protectedContent">
-            Please login or enter your email to receive the link.
+            Please enter your email to receive the link.
           </Typography>
           <Grid container spacing={2} direction="column" alignItems="center">
             <Grid item>
-            <TextField
-              id="email"
-              label="Email"
-              variant="outlined"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="emailField"
-            />
-
+              <TextField
+                id="email"
+                label="Email"
+                variant="outlined"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="emailField"
+              />
             </Grid>
             <Grid item xs={12} md={6}>
               <Button onClick={handleSendEmail} fullWidth className="btn-send-link">

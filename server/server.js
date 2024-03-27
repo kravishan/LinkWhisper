@@ -9,8 +9,14 @@ import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { urlSchema } from './schema/urlSchema.js';
 import { User } from './schema/User.js';
+import sgMail from '@sendgrid/mail';
+import SibApiV3Sdk from 'sib-api-v3-sdk';
 
 dotenv.config();
+
+var defaultClient = SibApiV3Sdk.ApiClient.instance;
+var apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const app = express();
 app.use(cors());
@@ -102,7 +108,7 @@ app.post('/api/login', (req, res, next) => {
 
     const accessToken = jwt.sign({ email: userEmail }, process.env.JWT_SECRET);
 
-    console.log('Token:', accessToken);
+    // console.log('Token:', accessToken);
 
 
     // Send success message
@@ -241,6 +247,51 @@ app.get('/api/userData/:email', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+app.post('/api/send-email', async (req, res) => {
+  try {
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const { email, shortUrl } = req.body; // Extract user's email and shortUrl from request body
+
+    // Query the database for a record with the provided shortUrl
+    const urlData = await URL.findOne({ shortUrl: shortUrl });
+
+    if (!urlData) {
+      throw new Error('Original URL not found');
+    }
+
+    const originalUrl = urlData.originalUrl;
+
+    const sender = { 
+      email: 'testing@gmail.com',
+      name: 'Testing'
+    };
+
+    const receivers = [
+      {
+        email: email, // Use the email provided by the user
+      }
+    ];
+
+    const sendEmail = await apiInstance.sendTransacEmail({
+      sender,
+      to: receivers,
+      subject: 'Test Email',
+      textContent: `Here is the link you requested: ${originalUrl}`, // Include original URL in email content
+      htmlContent: `<html><body><h1>Here is the link you requested:</h1><a href="${originalUrl}">${originalUrl}</a></body></html>` // Include original URL as a clickable link in email content
+    });
+    
+    return res.json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    // Send error response
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 
 
 
