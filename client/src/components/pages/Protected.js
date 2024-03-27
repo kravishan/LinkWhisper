@@ -6,8 +6,8 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import Snackbar from '@mui/material/Snackbar'; // Import Snackbar component
-import MuiAlert from '@mui/material/Alert'; // Import Alert component for Snackbar
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import '../style/protected.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -21,9 +21,10 @@ export const Protected = () => {
   const [shortUrl, setShortUrl] = useState('');
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [openSnackbar, setOpenSnackbar] = useState(false); // State for snackbar
+  const [failureMessage, setFailureMessage] = useState('');
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  const navigate = useNavigate(); // useNavigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -35,13 +36,16 @@ export const Protected = () => {
     try {
       await sendEmail(email, shortUrl);
       setSuccessMessage("Email sent successfully");
-      setOpenSnackbar(true); // Open the snackbar
+      setFailureMessage(""); // Reset failure message
+      setOpenSnackbar(true);
       setTimeout(() => {
-        setOpenSnackbar(false); // Close the snackbar
+        setOpenSnackbar(false);
         navigate("/");
-      }, 1000);
+      }, 6000);
     } catch (error) {
-      console.error('Error sending email:', error);
+      setFailureMessage("Failed to send email");
+      setSuccessMessage(""); // Reset success message
+      setOpenSnackbar(true);
     }
   };
 
@@ -107,10 +111,10 @@ export const Protected = () => {
         open={openSnackbar}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} // Bottom left corner
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <MuiAlert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-          {successMessage}
+        <MuiAlert onClose={handleCloseSnackbar} severity={successMessage ? "success" : "error"} sx={{ width: '100%' }}>
+          {successMessage || failureMessage}
         </MuiAlert>
       </Snackbar>
     </Box>

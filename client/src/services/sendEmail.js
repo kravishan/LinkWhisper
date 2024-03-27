@@ -5,7 +5,6 @@ const sendEmail = async (email, shortUrl) => {
     const response = await axios.post('http://localhost:8000/api/send-email', { email, shortUrl });
     return response.data;
   } catch (error) {
-    console.error('Error sending email:', error);
     throw error;
   }
 };

@@ -267,7 +267,7 @@ app.post('/api/send-email', async (req, res) => {
 
     const sender = { 
       email: 'testing@gmail.com',
-      name: 'Testing'
+      name: 'Your Link'
     };
 
     const receivers = [
