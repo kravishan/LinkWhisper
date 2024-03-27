@@ -46,7 +46,7 @@ const Cookies = {
         return;
       }
   
-      document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 2050 00:00:00 GMT`;
     }
   };
   

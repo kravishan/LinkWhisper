@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
@@ -12,6 +13,7 @@ import { User } from './schema/User.js';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
 
@@ -203,6 +205,29 @@ app.get('/:shortUrl', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
+
+
+// Define a route to handle fetching the original URL
+app.get('/api/original-url/:shortUrl', authenticateToken, async (req, res) => {
+  try {
+    const shortUrlParam = req.params.shortUrl;
+
+    // Query the database for a record with the provided shortUrl
+    const urlData = await URL.findOne({ shortUrl: shortUrlParam });
+
+    if (urlData) {
+      // If a record is found, send back the original URL to the client
+      res.json({ originalUrl: urlData.originalUrl });
+    } else {
+      // If no record is found, send back an error message
+      res.status(404).json({ error: 'Shortened URL not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching original URL:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 // Define an endpoint to fetch user data from the database
