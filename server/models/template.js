@@ -1,4 +1,4 @@
-const generateEmailContent = (originalUrl) => {
+const generateEmailContent = (shortUrl) => {
     const htmlEmail = `
       <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
       <html dir="ltr" lang="en">
@@ -22,8 +22,8 @@ const generateEmailContent = (originalUrl) => {
                     </tr>
                   </tbody>
                 </table>
-                <p style="font-size:15px;line-height:1.4;margin:0 0 15px;color:#3c4149">This link and code will be valid until the owner deletes it</p><code style="font-family:monospace;font-weight:700;padding:1px 4px;background-color:#dfe1e4;letter-spacing:-0.3px;font-size:21px;border-radius:4px;color:#3c4149">${originalUrl}</code>
-                <hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#dfe1e4;margin:42px 0 26px" /><a href="https://linear.app" style="color:#b4becc;text-decoration:none;font-size:14px" target="_blank">LINKWHISPER</a>
+                <p style="font-size:15px;line-height:1.4;margin:0 0 15px;color:#3c4149">This link and code will be valid until the owner deletes it</p><code style="font-family:monospace;font-weight:700;padding:1px 4px;background-color:#dfe1e4;letter-spacing:-0.3px;font-size:21px;border-radius:4px;color:#3c4149"><a href="http://localhost:8000/${shortUrl}" target="_blank">${shortUrl}</a></code>
+                <hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#dfe1e4;margin:42px 0 26px" /><a href="" style="color:#b4becc;text-decoration:none;font-size:14px" target="_blank">LINKWHISPER</a>
               </td>
             </tr>
           </tbody>

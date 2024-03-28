@@ -7,11 +7,13 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { urlSchema } from './schema/urlSchema.js';
+import { urlSchema } from './schema/url.js';
 import { User } from './schema/User.js';
 import sgMail from '@sendgrid/mail';
 import SibApiV3Sdk from 'sib-api-v3-sdk';
 import generateEmailContent  from './models/template.js';
+import { Tracking } from './schema/tracking.js';
+import e from 'express';
 
 
 dotenv.config();
@@ -188,31 +190,47 @@ app.get('/:shortUrl', async (req, res) => {
       const expirationDate = urlData.expirationDate ? new Date(urlData.expirationDate) : null;
       const requireSignIn = urlData.requireSignIn || false;
 
-      if (requireSignIn === true) {
+      // Find the tracking data
+      const trackingData = await Tracking.findOne({ shortUrl });
+
+      // Update tracking to "Enabled" if it exists
+      if (trackingData && trackingData.tracking === 'Not Enabled') {
+        await Tracking.updateOne({ shortUrl }, { $set: { tracking: 'Enabled' } });
+      }
+
+      // Check if requireSignIn is true
+      if (requireSignIn === true && (!trackingData || trackingData.tracking === 'Not Enabled')) {
         return res.redirect(`http://localhost:3000/protected?shortUrl=${shortUrl}`);
+      }
+
+      // Check if tracking is enabled
+      if (trackingData && trackingData.tracking === 'Enabled') {
+        return res.redirect(urlData.originalUrl);
       }
 
       if (startDate === null && expirationDate === null) {
         // No start date and no expiration date, URL is accessible
-        res.redirect(urlData.originalUrl);
+        return res.redirect(urlData.originalUrl);
       } else if (startDate !== null && startDate > currentDate) {
         // Start date is in the future, URL is not yet available
-        res.status(400).send('Shortened URL is not available yet');
+        return res.status(400).send('Shortened URL is not available yet');
       } else if (expirationDate !== null && expirationDate <= currentDate) {
         // Expiration date is in the past, URL has expired
-        res.status(400).send('Shortened URL has expired');
+        return res.status(400).send('Shortened URL has expired');
       } else {
         // URL is accessible
-        res.redirect(urlData.originalUrl);
+        return res.redirect(urlData.originalUrl);
       }
     } else {
-      res.status(404).send('URL not found');
+      return res.status(404).send('URL not found');
     }
   } catch (error) {
     console.error('Error redirecting:', error);
-    res.status(500).send('Internal Server Error');
+    return res.status(500).send('Internal Server Error');
   }
 });
+
+
 
 
 // Define a route to handle fetching the original URL
@@ -276,7 +294,16 @@ app.post('/api/send-email', async (req, res) => {
       }
     ];
 
-    const htmlContent = generateEmailContent(originalUrl); // Generate HTML email content using the template function
+    const htmlContent = generateEmailContent(shortUrl); // Generate HTML email content using the template function
+
+    // Save tracking data to the database
+    const trackingData = new Tracking({
+      shortUrl: shortUrl,
+      senderEmail: sender.email,
+      receiverEmail: email,
+      tracking: 'Enabled'
+    });
+    await trackingData.save();
 
     const sendEmail = await apiInstance.sendTransacEmail({
       sender,
