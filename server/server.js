@@ -207,6 +207,9 @@ app.get('/:shortUrl', async (req, res) => {
       if (trackingData && trackingData.tracking === 'Enabled') {
         // Update tracking data to 'Visited'
         await Tracking.findOneAndUpdate({ shortUrl }, { tracking: 'Visited' });
+
+        sendConfirmationEmail(shortUrl);
+
         // Redirect to the original URL
         return res.redirect(urlData.originalUrl);
       }
@@ -232,6 +235,61 @@ app.get('/:shortUrl', async (req, res) => {
     return res.status(500).send('Internal Server Error');
   }
 });
+
+const sendConfirmationEmail = async (shortUrl) => {
+  try {
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    // Find the tracking data for the given shortUrl
+    const trackingData = await Tracking.findOne({ shortUrl });
+
+    if (!trackingData) {
+      throw new Error('Tracking data not found');
+    }
+
+    // Retrieve senderEmail from the shortener collection
+    const urlData = await URL.findOne({ shortUrl });
+    if (!urlData) {
+      throw new Error('URL data not found');
+    }
+    const { email: senderEmail } = urlData;
+
+    // Update tracking to "Visited"
+    trackingData.tracking = 'Visited';
+    await trackingData.save();
+
+    // Construct email content
+    const emailContent = `Opened your URL ${shortUrl}"`;
+
+    // Construct email parameters
+    const sender = {
+      email: 'testing@gmail.com', // Set the sender's email address
+      name: 'Email' // Set the sender's name
+    };
+
+    const receivers = [
+      {
+        email: senderEmail // Use the sender's email retrieved from the database
+      }
+    ];
+
+    // Send transactional email
+    await apiInstance.sendTransacEmail({
+      sender,
+      to: receivers,
+      subject: 'URL Confirmation',
+      htmlContent: emailContent
+    });
+
+    console.log('Confirmation email sent successfully');
+  } catch (error) {
+    console.error('Error sending confirmation email:', error);
+    // Handle error
+  }
+};
+
+
+
 
 
 
@@ -302,7 +360,7 @@ app.post('/api/send-email', async (req, res) => {
     // Save tracking data to the database
     const trackingData = new Tracking({
       shortUrl: shortUrl,
-      senderEmail: sender.email,
+      // senderEmail: sender.email,
       receiverEmail: email,
       tracking: 'Enabled'
     });

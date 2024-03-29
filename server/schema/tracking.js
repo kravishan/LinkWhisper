@@ -8,7 +8,7 @@ const trackingSchema = new mongoose.Schema({
   },
   senderEmail: {
     type: String,
-    required: true
+    required: false
   },
   receiverEmail: {
     type: String,
