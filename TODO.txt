@@ -1,0 +1,6 @@
+Conver link to QR
+Add button for says state of the link whether it is opened or not 
+time opend 
+have chnace to active or not active emeial  confimation 
+expire data confitions need to check before others
+page to send email to renew the link

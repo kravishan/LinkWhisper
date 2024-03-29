@@ -6,6 +6,7 @@ import { faCog } from '@fortawesome/free-solid-svg-icons'; // Import the cog ico
 import { faLink } from '@fortawesome/free-solid-svg-icons'; // Import the faLink icon
 import { AuthData } from "../../auth/AuthWrapper";
 import '../style/shortner.css';
+import QRCodeComponent from '../QRCodeComponent';
 
 
 const Shortner = () => {
@@ -20,6 +21,7 @@ const Shortner = () => {
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false); // State variable to toggle advanced settings visibility
   const [requireSignIn, setRequireSignIn] = useState(false);
   const [sharedEmails, setSharedEmails] = useState([]);
+  const [showQRCode, setShowQRCode] = useState(false);
 
   
 
@@ -41,6 +43,10 @@ const Shortner = () => {
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(`http://localhost:8000/${shortenedLink}`);
+  };
+
+  const handleConvertToQRCode = () => {
+    setShowQRCode(true); // Show QR code when the button is clicked
   };
 
   // const toggleUserData = () => {
@@ -113,8 +119,17 @@ const Shortner = () => {
               <FiCopy onClick={handleCopyToClipboard} style={{ cursor: "pointer", fontSize: "1.5em", marginLeft: "5px", color: "#007bff" }} />
             </p>
           </div>
+          <div className="col-md-12">
+              <div className="form-group">
+                <button className="btn btn-secondary" onClick={handleConvertToQRCode}>Convert to QR Code</button>
+              </div>
+            </div>
+          
         </div>
       )}
+
+      {/* Render QR code component */}
+      {showQRCode && <QRCodeComponent url={`http://localhost:8000/${shortenedLink}`} />}
       
       <div className="mt-3">
         {showAdvancedSettings && (
@@ -152,6 +167,13 @@ const Shortner = () => {
                 />
               </div>
             </div>
+            
+
+
+
+
+
+
           </div>
         )}
       </div>

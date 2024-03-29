@@ -13,6 +13,6 @@ export const nav = [
      { path:     "/signup",    name: "Sign Up",       element: <Signup />,      isMenu: true,    isPrivate: false,  isLogged:false},
      { path:     "/protected",  name: "Protected",     element: <Protected />,    isMenu: false,     isPrivate: false  },
      // { path:     "/shortner",  name: "Shortner",     element: <Shortner />,    isMenu: true,     isPrivate: true  },
-     { path:     "/account",  name: "Account",     element: <Account />,    isMenu: false,     isPrivate: true  },
+     { path:     "/account",  name: "Account",     element: <Account />,    isMenu: true,     isPrivate: true  },
      { path:     "/shortner",  name: "Shortner",     element: <Shortner />,    isMenu: true,     isPrivate: false  },
 ]
