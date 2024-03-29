@@ -36,11 +36,11 @@ To run the URL Shortener locally:
 3. Install dependencies for both frontend and backend
 4. Set up MongoDB database
 5. Start the backend server:
-`cd server
-npm start`
+`cd server`
+`npm start`
 6. Start the frontend development server:
-`cd client
-npm start`
+`cd client`
+`npm start`
 7. Access the application at http://localhost:3000 in your web browser
 
 ## Usage
