@@ -205,6 +205,9 @@ app.get('/:shortUrl', async (req, res) => {
 
       // Check if tracking is enabled
       if (trackingData && trackingData.tracking === 'Enabled') {
+        // Update tracking data to 'Visited'
+        await Tracking.findOneAndUpdate({ shortUrl }, { tracking: 'Visited' });
+        // Redirect to the original URL
         return res.redirect(urlData.originalUrl);
       }
 
